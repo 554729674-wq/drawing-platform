@@ -2,50 +2,124 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>系统登录 - 审图平台</title>
+  <title>系统登录与注册 - 审图平台</title>
   <style>
     body { font-family: sans-serif; background: #eef2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-    .box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 320px; }
+    .box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 320px; position: relative;}
     .input-g { margin-bottom: 15px; }
     .input-g label { display: block; margin-bottom: 5px; color: #666; font-size: 0.9rem; }
     .input-g input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
-    button { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+    button { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; margin-top: 10px;}
     button:hover { background: #2980b9; }
+    .toggle-link { text-align: center; margin-top: 15px; font-size: 0.9rem; color: #7f8c8d; }
+    .toggle-link a { color: #3498db; text-decoration: none; cursor: pointer; font-weight: bold; }
+    
+    /* 默认隐藏注册表单 */
+    #register-form { display: none; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
   <div class="box">
-    <h3 style="text-align: center; margin-top: 0;">图纸审图平台</h3>
-    <div class="input-g">
-      <label>电子邮箱</label>
-      <input type="email" id="email" placeholder="输入邮箱账号">
+    <h3 style="text-align: center; margin-top: 0; color: #2c3e50;">图纸审图平台</h3>
+
+    <div id="login-form">
+      <div class="input-g">
+        <label>电子邮箱 (账户)</label>
+        <input type="email" id="login-email" placeholder="输入邮箱账号">
+      </div>
+      <div class="input-g">
+        <label>密码</label>
+        <input type="password" id="login-password" placeholder="输入密码">
+      </div>
+      <button onclick="handleLogin()">登 录</button>
+      <div class="toggle-link">
+        没有账号？ <a onclick="toggleForms()">立即注册</a>
+      </div>
     </div>
-    <div class="input-g">
-      <label>密码</label>
-      <input type="password" id="password" placeholder="输入密码">
+
+    <div id="register-form">
+      <div class="input-g">
+        <label>所属公司 / 单位名称</label>
+        <input type="text" id="reg-company" placeholder="例如：华东建筑设计研究院">
+      </div>
+      <div class="input-g">
+        <label>电子邮箱 (作为登录账户)</label>
+        <input type="email" id="reg-email" placeholder="输入您的邮箱">
+      </div>
+      <div class="input-g">
+        <label>设定密码 (至少6位)</label>
+        <input type="password" id="reg-password" placeholder="设置登录密码">
+      </div>
+      <button onclick="handleRegister()" style="background: #27ae60;">提交注册</button>
+      <div class="toggle-link">
+        已有账号？ <a onclick="toggleForms()">返回登录</a>
+      </div>
     </div>
-    <button onclick="handleLogin()">登 录</button>
   </div>
 
   <script>
     const SUPABASE_URL = 'https://mrowhymmhamvrxnvcqjv.supabase.co'; 
     const SUPABASE_ANON_KEY = 'sb_publishable_idaDaiECgUZeYsCxDkolBg_6bKbkVe_';
-    
-    // 【修复点】改成了 mySupabase，避免和官方名称冲突
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // 切换登录/注册界面的显示
+    function toggleForms() {
+      const loginForm = document.getElementById('login-form');
+      const regForm = document.getElementById('register-form');
+      if (loginForm.style.display === 'none') {
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
+      } else {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'block';
+      }
+    }
+
+    // 处理登录
     async function handleLogin() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      if(!email || !password) return alert("请填写完整！");
 
       const { data, error } = await mySupabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        alert("登录失败: " + error.message + " (请检查密码或是否已注册)");
+      } else {
+        window.location.href = 'index.html'; 
+      }
+    }
+
+    // 处理注册
+    async function handleRegister() {
+      const company = document.getElementById('reg-company').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+
+      if(!company || !email || !password) return alert("所有信息都必须填写！");
+      if(password.length < 6) return alert("密码不能少于6位！");
+
+      // Supabase 注册功能，并在 user_metadata 中保存公司名称
+      const { data, error } = await mySupabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            company_name: company
+          }
+        }
+      });
 
       if (error) {
-        alert("登录失败: " + error.message + " (请确认账号密码是否正确)");
+        alert("注册失败: " + error.message);
       } else {
-        alert("登录成功！即将进入审图界面。");
-        window.location.href = 'index.html'; 
+        alert("注册成功！公司信息已记录。现在您可以直接登录了。");
+        // 注册成功后，自动切换回登录界面并填入刚才注册的邮箱
+        toggleForms();
+        document.getElementById('login-email').value = email;
+        document.getElementById('reg-password').value = ''; // 清空密码框策安全
       }
     }
   </script>
