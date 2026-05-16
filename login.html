@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>系统登录 - 审图平台</title>
+  <style>
+    body { font-family: sans-serif; background: #eef2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 320px; }
+    .input-g { margin-bottom: 15px; }
+    .input-g label { display: block; margin-bottom: 5px; color: #666; font-size: 0.9rem; }
+    .input-g input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
+    button { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #2980b9; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="box">
+    <h3 style="text-align: center; margin-top: 0;">图纸审图平台</h3>
+    <div class="input-g">
+      <label>电子邮箱</label>
+      <input type="email" id="email" placeholder="输入邮箱账号">
+    </div>
+    <div class="input-g">
+      <label>密码</label>
+      <input type="password" id="password" placeholder="输入密码">
+    </div>
+    <button onclick="handleLogin()">登 录</button>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://mrowhymmhamvrxnvcqjv.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'sb_publishable_idaDaiECgUZeYsCxDkolBg_6bKbkVe_';
+    
+    // 【修复点】改成了 mySupabase，避免和官方名称冲突
+    const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function handleLogin() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const { data, error } = await mySupabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        alert("登录失败: " + error.message + " (请确认账号密码是否正确)");
+      } else {
+        alert("登录成功！即将进入审图界面。");
+        window.location.href = 'index.html'; 
+      }
+    }
+  </script>
+</body>
+</html>

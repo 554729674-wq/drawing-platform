@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>工程图纸审图平台</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; background: #f4f7f6; }
+    header { background: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;}
+    header h2 { margin: 0; font-size: 1.2rem; }
+    .main { display: flex; flex: 1; padding: 15px; gap: 15px; height: calc(100vh - 80px); }
+    .left { flex: 7; background: white; border-radius: 8px; display: flex; flex-direction: column; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .right { flex: 3; background: white; border-radius: 8px; display: flex; flex-direction: column; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .comment-list { flex: 1; overflow-y: auto; background: #fafafa; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #eee; }
+    .comment-item { background: white; padding: 12px; border: 1px solid #e9ecef; margin-bottom: 8px; border-radius: 6px; font-size: 0.95rem; line-height: 1.5; color: #333;}
+    textarea { width: 100%; box-sizing: border-box; resize: none; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; outline: none; }
+    textarea:focus { border-color: #3498db; }
+    .btn { padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .btn:hover { background: #2980b9; }
+    .canvas { flex: 1; background: #eef2f5; display: flex; align-items: center; justify-content: center; border: 2px dashed #b2bec3; margin-top: 10px; color: #7f8c8d; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header>
+    <h2>📐 露香园项目 - 施工图审图与协同</h2>
+    <button class="btn" style="background:#e74c3c" onclick="location.href='login.html'">退出登录</button>
+  </header>
+
+  <div class="main">
+    <div class="left">
+      <div>
+        <button class="btn" onclick="alert('存储功能下一步对接 Cloudflare R2 网盘')">☁️ 上传最新修改图纸</button>
+      </div>
+      <div class="canvas">图纸预览区域加载中... (大图纸将在后续配置高速存储)</div>
+    </div>
+    
+    <div class="right">
+      <h3 style="margin-top:0; color: #2c3e50;">💬 图纸审查意见</h3>
+      <div class="comment-list" id="box-list">正在连接云端数据库...</div>
+      <textarea id="msg" rows="4" placeholder="输入意见。例如：请核实单窗最大排烟面积；或者 CAD 插件中模块大于 2 平米请优先水平分割..."></textarea>
+      <button class="btn" onclick="sendMsg()" style="width: 100%;">发送意见</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://mrowhymmhamvrxnvcqjv.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'sb_publishable_idaDaiECgUZeYsCxDkolBg_6bKbkVe_';
+    
+    // 【修复点】改成了 mySupabase
+    const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function loadComments() {
+      const { data, error } = await mySupabase.from('audit_comments').select('*').order('created_at', { ascending: true });
+      const listDiv = document.getElementById('box-list');
+      
+      if (error) {
+        listDiv.innerText = "数据读取失败: " + error.message;
+        return;
+      }
+      
+      listDiv.innerHTML = '';
+      if(data.length === 0) {
+        listDiv.innerHTML = '<div style="color:#999; text-align:center; margin-top: 20px;">暂无审图意见</div>';
+      } else {
+        data.forEach(item => {
+          listDiv.innerHTML += `<div class="comment-item">📌 ${item.content}</div>`;
+        });
+      }
+      listDiv.scrollTop = listDiv.scrollHeight;
+    }
+
+    async function sendMsg() {
+      const txt = document.getElementById('msg').value.trim();
+      if(!txt) return alert("修改意见不能为空");
+
+      const { error } = await mySupabase.from('audit_comments').insert([{ content: txt }]);
+      if (error) {
+        alert("发送失败: " + error.message);
+      } else {
+        document.getElementById('msg').value = '';
+        loadComments(); 
+      }
+    }
+
+    loadComments(); 
+  </script>
+</body>
+</html>
