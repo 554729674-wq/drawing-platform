@@ -1,99 +1,337 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>威卢克斯项目审图平台</title>
+  <title>公司用户工作台 - 渠道图纸审图平台</title>
   <style>
-    body { margin: 0; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex; flex-direction: column; min-height: 100vh; background: #f4f5f7; color: #111827; }
-    header { background: white; color: #111827; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; }
-    .brand { display: flex; align-items: center; gap: 14px; }
-    .brand img { height: 34px; width: auto; }
-    .brand-title { margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.01em; }
-    .brand-subtitle { margin: 4px 0 0; font-size: 0.92rem; color: #6b7280; }
-    .main { display: flex; flex: 1; padding: 22px; gap: 18px; min-height: calc(100vh - 78px); }
-    .left, .right { background: white; border-radius: 18px; display: flex; flex-direction: column; padding: 20px; box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08); border: 1px solid rgba(226, 232, 240, 0.8); }
-    .left { flex: 7; }
-    .right { flex: 3; }
-    .comment-list { flex: 1; overflow-y: auto; background: #f8fafc; padding: 14px; border-radius: 16px; margin-bottom: 14px; border: 1px solid #e5e7eb; }
-    .comment-item { background: white; padding: 14px; border: 1px solid #e5e7eb; margin-bottom: 12px; border-radius: 14px; font-size: 0.96rem; line-height: 1.65; color: #1f2937; }
-    textarea { width: 100%; box-sizing: border-box; resize: none; padding: 14px; margin-bottom: 12px; border: 1px solid #d1d5db; border-radius: 14px; outline: none; background: #f8fafc; font-size: 0.95rem; color: #111827; }
-    textarea:focus { border-color: #c8102e; background: #ffffff; }
-    .btn { padding: 10px 18px; background: #c8102e; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: background 0.2s ease; }
-    .btn:hover { background: #9f0d28; }
-    .canvas { flex: 1; background: #eef2f5; display: flex; align-items: center; justify-content: center; border: 2px dashed #d1d5db; margin-top: 16px; color: #6b7280; border-radius: 18px; }
-    .section-title { margin: 0 0 16px; color: #111827; font-size: 1rem; font-weight: 700; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f4f7f6; color: #1f2937; }
+    a, button { font-family: inherit; }
+    button { cursor: pointer; }
+    .page-shell { max-width: 1280px; margin: 0 auto; padding: 0 20px 40px; }
+    header { background: #2c3e50; color: #ffffff; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; border-radius: 0 0 18px 18px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08); }
+    .brand-section { display: flex; align-items: center; gap: 14px; }
+    .brand-title { margin: 0; font-size: 1.18rem; font-weight: 700; letter-spacing: 0.02em; }
+    .brand-title span { font-size: 1.05rem; }
+    .header-actions { display: flex; align-items: center; gap: 18px; }
+    .company-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #f3f4f6; border-radius: 999px; padding: 10px 14px; font-size: 0.95rem; }
+    .company-badge span { display: inline-flex; align-items: center; }
+    .notification-btn { position: relative; width: 42px; height: 42px; border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; background: transparent; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; transition: background 0.2s ease, transform 0.2s ease; }
+    .notification-btn:hover { background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+    .notification-btn::after { content: ""; position: absolute; top: 10px; right: 10px; width: 10px; height: 10px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); animation: pulse 1.8s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); } 50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } }
+    .ghost-btn { border: 1px solid rgba(255,255,255,0.72); color: white; background: transparent; border-radius: 999px; padding: 10px 18px; transition: background 0.2s ease, opacity 0.2s ease; }
+    .ghost-btn:hover { background: rgba(255,255,255,0.1); opacity: 0.94; }
+    main { margin-top: 24px; }
+    .action-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+    .action-bar h1 { margin: 0; font-size: 1.4rem; color: #111827; }
+    .primary-btn { background: #3498db; color: white; border: none; border-radius: 12px; padding: 14px 20px; font-size: 0.95rem; font-weight: 700; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 16px 35px rgba(52, 152, 219, 0.18); transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease; }
+    .primary-btn:hover { transform: translateY(-1px); background: #2c82c9; }
+    .content-area { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    .project-card { background: white; border-radius: 18px; border-left: 4px solid #3498db; box-shadow: 0 20px 45px rgba(15, 23, 42, 0.06); padding: 20px 22px; overflow: hidden; }
+    .project-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+    .project-title { margin: 0; font-size: 1.1rem; font-weight: 700; color: #111827; }
+    .project-subtitle { margin: 4px 0 0; color: #6b7280; font-size: 0.92rem; }
+    .project-table { width: 100%; border-collapse: collapse; min-width: 100%; }
+    .project-table th, .project-table td { padding: 14px 12px; text-align: left; vertical-align: middle; }
+    .project-table th { color: #374151; font-size: 0.92rem; font-weight: 700; border-bottom: 1px solid #e5e7eb; }
+    .project-table tbody tr:nth-child(odd) { background: #fafbfc; }
+    .project-table tbody tr:last-child td { border-bottom: none; }
+    .status-pill { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 999px; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.01em; }
+    .status-draft { background: #f3f4f6; color: #4b5563; }
+    .status-review { background: #fef3c7; color: #92400e; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .status-passed { background: #dcfce7; color: #166534; }
+    .action-group { display: flex; flex-wrap: wrap; gap: 10px; }
+    .text-btn { border: 1px solid rgba(52, 152, 219, 0.22); background: transparent; border-radius: 10px; padding: 9px 14px; color: #2563eb; font-weight: 600; transition: background 0.2s ease, transform 0.2s ease; }
+    .text-btn:hover { background: rgba(52, 152, 219, 0.08); transform: translateY(-1px); }
+    .danger-btn { border: 1px solid #ef4444; background: rgba(254, 226, 226, 0.35); color: #b91c1c; }
+    .disabled-btn { opacity: 0.48; cursor: not-allowed; pointer-events: none; border-color: #d1d5db; color: #6b7280; }
+    .empty-state { border: 1px dashed #cbd5e1; background: #ffffff; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 32px; text-align: center; color: #475569; gap: 18px; }
+    .empty-state p { margin: 0; font-size: 1rem; line-height: 1.75; }
+    .empty-icon { width: 88px; height: 88px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #eff6ff; color: #2563eb; font-size: 2rem; }
+    .loading-mask { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(244,247,246,0.85); z-index: 20; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+    .loading-mask.active { opacity: 1; pointer-events: all; }
+    .loading-card { background: white; padding: 28px 34px; border-radius: 18px; box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08); text-align: center; }
+    .loading-dot { width: 10px; height: 10px; margin: 0 6px; border-radius: 50%; display: inline-block; background: #3498db; animation: bounce 0.8s infinite ease-in-out; }
+    .loading-dot:nth-child(2) { animation-delay: 0.12s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.24s; }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .message-banner { background: #f8fafc; border: 1px solid #dbeafe; color: #1e3a8a; border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .message-banner strong { color: #0f172a; }
+    .error-message { margin: 0; color: #b91c1c; font-weight: 700; }
+    @media (max-width: 960px) {
+      .page-shell { padding: 0 14px 30px; }
+      header { flex-direction: column; align-items: flex-start; gap: 16px; border-radius: 0 0 18px 18px; }
+      .header-actions { width: 100%; justify-content: space-between; }
+      .action-bar { flex-direction: column; align-items: stretch; }
+      .project-card { padding: 18px 18px; }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <img src="velux-logo.png" alt="VELUX Logo">
-      <div>
-        <h2 class="brand-title">威卢克斯项目审图平台</h2>
-        <div class="brand-subtitle">施工图审图与协同管理</div>
+  <div class="loading-mask" id="loadingMask">
+    <div class="loading-card">
+      <div style="font-size: 1rem; color: #111827; margin-bottom: 16px;">正在加载工作台，请稍候...</div>
+      <div style="display:flex; justify-content:center; align-items:center;">
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
       </div>
-    </div>
-    <button class="btn" onclick="location.href='login.html'">退出登录</button>
-  </header>
-
-  <div class="main">
-    <div class="left">
-      <div>
-        <button class="btn" onclick="alert('存储功能下一步对接 Cloudflare R2 网盘')">☁️ 上传最新修改图纸</button>
-      </div>
-      <div class="canvas">图纸预览区域加载中... (大图纸将在后续配置高速存储)</div>
-    </div>
-    
-    <div class="right">
-      <h3 style="margin-top:0; color: #2c3e50;">💬 图纸审查意见</h3>
-      <div class="comment-list" id="box-list">正在连接云端数据库...</div>
-      <textarea id="msg" rows="4" placeholder="输入意见。例如：请核实单窗最大排烟面积；或者 CAD 插件中模块大于 2 平米请优先水平分割..."></textarea>
-      <button class="btn" onclick="sendMsg()" style="width: 100%;">发送意见</button>
     </div>
   </div>
 
+  <div class="page-shell">
+    <header>
+      <div class="brand-section">
+        <div class="brand-title">📐 渠道图纸审图平台</div>
+      </div>
+      <div class="header-actions">
+        <div class="company-badge" id="companyBadge"><span>🏢 未知公司</span></div>
+        <button class="notification-btn" aria-label="消息中心">🔔</button>
+        <button class="ghost-btn" id="signOutBtn">退出登录</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="action-bar">
+        <h1>公司用户工作台</h1>
+        <button class="primary-btn" id="createProjectBtn">➕ 新建项目</button>
+      </div>
+
+      <div id="contentArea" class="content-area"></div>
+    </main>
+  </div>
+
   <script>
-    const SUPABASE_URL = 'https://mrowhymmhamvrxnvcqjv.supabase.co'; 
+    const SUPABASE_URL = 'https://mrowhymmhamvrxnvcqjv.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_idaDaiECgUZeYsCxDkolBg_6bKbkVe_';
-    
-    // 【修复点】改成了 mySupabase
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function loadComments() {
-      const { data, error } = await mySupabase.from('audit_comments').select('*').order('created_at', { ascending: true });
-      const listDiv = document.getElementById('box-list');
-      
-      if (error) {
-        listDiv.innerText = "数据读取失败: " + error.message;
+    const ADMIN_RESERVED_KEYS = ['总工办', 'admin', '管理员', 'superuser', '超级管理'];
+    const contentArea = document.getElementById('contentArea');
+    const companyBadge = document.getElementById('companyBadge');
+    const loadingMask = document.getElementById('loadingMask');
+
+    const mockProjects = [
+      {
+        company: '威卢克斯建筑工程有限公司',
+        projectName: '威卢克斯总部办公楼',
+        description: 'A段与B段幕墙采光改造',
+        drawings: [
+          { name: '采光系统说明.pdf', version: 'V1', status: '已驳回', remark: '补充横向排水与防水节点说明' },
+          { name: '天窗安装图.pdf', version: 'V3', status: '待审核' },
+          { name: '消防联动检测.pdf', version: 'V1', status: '待提交' }
+        ]
+      },
+      {
+        company: '威卢克斯建筑工程有限公司',
+        projectName: '威卢克斯智能工厂改造',
+        description: '3号厂房天窗优化设计',
+        drawings: [
+          { name: '通风风量计算.pdf', version: 'V2', status: '已通过' },
+          { name: '施工节点详图.pdf', version: 'V1', status: '待提交' }
+        ]
+      },
+      {
+        company: '同福建设有限公司',
+        projectName: '虹桥商务中心',
+        description: '商业综合体室内采光方案',
+        drawings: [
+          { name: '统一采光策略.pdf', version: 'V1', status: '待审核' },
+          { name: '电气布置图.dwg', version: 'V2', status: '已驳回', remark: '请补充避雷设计说明' } ]
+      }
+    ];
+
+    function showLoading(active) {
+      loadingMask.classList.toggle('active', active);
+    }
+
+    function redirectToLogin(message) {
+      if (message) {
+        alert(message);
+      }
+      location.href = 'login.html';
+    }
+
+    function hasAdminReservedWord(companyName) {
+      if (!companyName) return false;
+      const normalized = companyName.toLowerCase();
+      return ADMIN_RESERVED_KEYS.some(key => normalized.includes(key.toLowerCase()));
+    }
+
+    function renderStatusPill(status) {
+      const statusClass = {
+        '待提交': 'status-draft',
+        '待审核': 'status-review',
+        '已驳回': 'status-rejected',
+        '已通过': 'status-passed'
+      }[status] || 'status-draft';
+      return `<span class="status-pill ${statusClass}">${status}</span>`;
+    }
+
+    function renderActions(drawing, projectName) {
+      if (drawing.status === '待审核' || drawing.status === '已通过') {
+        return `<div class="action-group"><button class="text-btn" onclick="viewDetails('${projectName}', '${drawing.name}')">查看详情</button></div>`;
+      }
+
+      if (drawing.status === '待提交') {
+        return `<div class="action-group">
+          <button class="text-btn" onclick="uploadDrawing('${projectName}', '${drawing.name}')">上传图纸</button>
+          <button class="text-btn" onclick="submitReview('${projectName}', '${drawing.name}')">提交审核</button>
+        </div>`;
+      }
+
+      if (drawing.status === '已驳回') {
+        return `<div class="action-group">
+          <button class="text-btn danger-btn" onclick="viewRejectReason('${projectName}', '${drawing.name}')">查看驳回意见</button>
+          <button class="text-btn" onclick="uploadNewVersion('${projectName}', '${drawing.name}')">上传新版 (V+1)</button>
+        </div>`;
+      }
+
+      return `<div class="action-group"><button class="text-btn" onclick="viewDetails('${projectName}', '${drawing.name}')">查看详情</button></div>`;
+    }
+
+    function renderProjectCard(project) {
+      const rows = project.drawings.map(drawing => `
+        <tr>
+          <td>${drawing.name}</td>
+          <td>${drawing.version}</td>
+          <td>${renderStatusPill(drawing.status)}</td>
+          <td>${renderActions(drawing, project.projectName)}</td>
+        </tr>
+      `).join('');
+
+      return `
+        <section class="project-card">
+          <div class="project-meta">
+            <div>
+              <h2 class="project-title">${project.projectName}</h2>
+              <p class="project-subtitle">${project.description}</p>
+            </div>
+            <div style="color:#6b7280; font-size:0.9rem;">公司隔离：${project.company}</div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="project-table">
+              <thead>
+                <tr>
+                  <th>图纸名称</th>
+                  <th>当前版本</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderEmptyState() {
+      return `
+        <div class="empty-state">
+          <div class="empty-icon">📂</div>
+          <h2>暂无项目</h2>
+          <p>当前账户尚未创建任何项目，请点击右上角“新建项目”开始。</p>
+        </div>
+      `;
+    }
+
+    function renderErrorState(message) {
+      return `
+        <div class="message-banner">
+          <span>⚠️</span>
+          <p class="error-message">${message}</p>
+        </div>
+      `;
+    }
+
+    function renderContent(projects) {
+      if (!projects || projects.length === 0) {
+        contentArea.innerHTML = renderEmptyState();
         return;
       }
-      
-      listDiv.innerHTML = '';
-      if(data.length === 0) {
-        listDiv.innerHTML = '<div style="color:#999; text-align:center; margin-top: 20px;">暂无审图意见</div>';
-      } else {
-        data.forEach(item => {
-          listDiv.innerHTML += `<div class="comment-item">📌 ${item.content}</div>`;
-        });
-      }
-      listDiv.scrollTop = listDiv.scrollHeight;
+      contentArea.innerHTML = projects.map(renderProjectCard).join('');
     }
 
-    async function sendMsg() {
-      const txt = document.getElementById('msg').value.trim();
-      if(!txt) return alert("修改意见不能为空");
+    async function initializePage() {
+      try {
+        showLoading(true);
+        const { data, error } = await mySupabase.auth.getUser();
+        const user = data?.user;
 
-      const { error } = await mySupabase.from('audit_comments').insert([{ content: txt }]);
-      if (error) {
-        alert("发送失败: " + error.message);
-      } else {
-        document.getElementById('msg').value = '';
-        loadComments(); 
+        if (error || !user) {
+          redirectToLogin('未检测到登录状态，请先登录。');
+          return;
+        }
+
+        const companyName = user.user_metadata?.company_name || '未知公司';
+        companyBadge.innerHTML = `<span>🏢 ${companyName || '未知公司'}</span>`;
+
+        if (hasAdminReservedWord(companyName)) {
+          redirectToLogin('当前用户角色与公司用户身份不匹配，请使用正确账户登录。');
+          return;
+        }
+
+        const allowedProjects = mockProjects.filter(item => item.company === companyName);
+        renderContent(allowedProjects);
+      } catch (err) {
+        contentArea.innerHTML = renderErrorState('加载失败，请刷新页面或稍后重试。');
+        console.error(err);
+      } finally {
+        showLoading(false);
       }
     }
 
-    loadComments(); 
+    async function signOut() {
+      try {
+        showLoading(true);
+        const { error } = await mySupabase.auth.signOut();
+        if (error) {
+          alert('退出登录失败：' + error.message);
+          return;
+        }
+        location.href = 'login.html';
+      } catch (err) {
+        alert('退出登录出现异常，请重试。');
+        console.error(err);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function viewDetails(projectName, drawingName) {
+      alert(`查看详情：${projectName} / ${drawingName}`);
+    }
+
+    function uploadDrawing(projectName, drawingName) {
+      alert(`上传图纸：${projectName} / ${drawingName}（此功能为演示占位，后续接入文件存储）`);
+    }
+
+    function submitReview(projectName, drawingName) {
+      alert(`提交审核：${projectName} / ${drawingName} 已提交，请等待总工办审批。`);
+    }
+
+    function viewRejectReason(projectName, drawingName) {
+      const project = mockProjects.find(item => item.projectName === projectName);
+      const drawing = project?.drawings.find(item => item.name === drawingName);
+      alert(`驳回原因：${drawing?.remark || '暂无说明'}`);
+    }
+
+    function uploadNewVersion(projectName, drawingName) {
+      alert(`上传新版 (V+1)：${projectName} / ${drawingName}（此功能为演示占位）`);
+    }
+
+    document.getElementById('signOutBtn').addEventListener('click', signOut);
+    document.getElementById('createProjectBtn').addEventListener('click', () => {
+      alert('新建项目功能为占位，后续可接入项目管理表。');
+    });
+
+    window.addEventListener('load', initializePage);
   </script>
 </body>
 </html>
