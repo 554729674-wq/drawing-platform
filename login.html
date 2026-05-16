@@ -2,19 +2,31 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>系统登录与注册 - 审图平台</title>
+  <title>威卢克斯项目审图平台 - 登录</title>
   <style>
-    body { font-family: sans-serif; background: #eef2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-    .box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 320px; position: relative;}
-    .input-g { margin-bottom: 15px; }
-    .input-g label { display: block; margin-bottom: 5px; color: #666; font-size: 0.9rem; }
-    .input-g input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
-    button { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; margin-top: 10px;}
-    button:hover { background: #2980b9; }
-    .toggle-link { text-align: center; margin-top: 15px; font-size: 0.9rem; color: #7f8c8d; }
-    .toggle-link a { color: #3498db; text-decoration: none; cursor: pointer; font-weight: bold; }
-    
-    /* 默认隐藏注册表单 */
+    body { font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f5f6f8; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #1f2937; }
+    .box { background: white; padding: 42px 36px; border-radius: 18px; box-shadow: 0 18px 40px rgba(18, 38, 61, 0.08); width: 400px; position: relative; border: 1px solid rgba(15, 23, 42, 0.08); }
+    .logo { text-align: center; margin-bottom: 18px; }
+    .logo img { width: 140px; max-width: 100%; height: auto; display: inline-block; }
+    .logo-title { text-align: center; margin: 0 0 24px; color: #111827; font-size: 1.22rem; font-weight: 700; letter-spacing: 0.02em; }
+    .auth-toggle { display: flex; gap: 10px; margin-bottom: 22px; }
+    .toggle-btn { flex: 1; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 10px; background: #f8fafc; cursor: pointer; font-size: 0.95rem; color: #4b5563; transition: all 0.18s ease; }
+    .toggle-btn.active { background: #c8102e; color: white; border-color: #c8102e; }
+    .toggle-btn:hover { background: #e5e7eb; }
+    .login-section { display: block; }
+    .code-row { display: flex; gap: 10px; }
+    .code-row input { flex: 1; }
+    .code-btn { width: auto; padding: 10px 14px; border-radius: 10px; border: none; background: #c8102e; color: white; cursor: pointer; transition: background 0.2s ease; }
+    .code-btn:hover { background: #9f0d28; }
+    .input-g { margin-bottom: 16px; }
+    .input-g label { display: block; margin-bottom: 8px; color: #4b5563; font-size: 0.94rem; }
+    .input-g input { width: 100%; padding: 12px 14px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 12px; background: #f8fafc; color: #111827; }
+    .input-g input:focus { border-color: #c8102e; outline: none; background: #ffffff; }
+    button { width: 100%; padding: 13px; background: #c8102e; color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: 600; margin-top: 12px; transition: background 0.2s ease; }
+    button:hover { background: #9f0d28; }
+    .toggle-link { text-align: center; margin-top: 16px; font-size: 0.9rem; color: #6b7280; }
+    .toggle-link a { color: #c8102e; text-decoration: none; cursor: pointer; font-weight: 600; }
+    .toggle-link a:hover { text-decoration: underline; }
     #register-form { display: none; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -22,18 +34,44 @@
 <body>
 
   <div class="box">
-    <h3 style="text-align: center; margin-top: 0; color: #2c3e50;">图纸审图平台</h3>
+    <div class="logo">
+      <img src="velux-logo.png" alt="VELUX Logo">
+    </div>
+    <h3 class="logo-title">威卢克斯项目审图平台</h3>
 
     <div id="login-form">
-      <div class="input-g">
-        <label>电子邮箱 (账户)</label>
-        <input type="email" id="login-email" placeholder="输入邮箱账号">
+      <div class="auth-toggle">
+        <button type="button" class="toggle-btn active" onclick="switchLoginMode('email')">邮箱登录</button>
+        <button type="button" class="toggle-btn" onclick="switchLoginMode('phone')">手机验证码</button>
       </div>
-      <div class="input-g">
-        <label>密码</label>
-        <input type="password" id="login-password" placeholder="输入密码">
+
+      <div id="email-login" class="login-section">
+        <div class="input-g">
+          <label>电子邮箱 (账户)</label>
+          <input type="email" id="login-email" placeholder="输入邮箱账号">
+        </div>
+        <div class="input-g">
+          <label>密码</label>
+          <input type="password" id="login-password" placeholder="输入密码">
+        </div>
+        <button onclick="handleLogin()">登 录</button>
       </div>
-      <button onclick="handleLogin()">登 录</button>
+
+      <div id="phone-login" class="login-section" style="display: none;">
+        <div class="input-g">
+          <label>手机号</label>
+          <input type="tel" id="login-phone" placeholder="+8613812345678">
+        </div>
+        <div class="input-g">
+          <label>短信验证码</label>
+          <div class="code-row">
+            <input type="text" id="login-phone-code" placeholder="输入验证码">
+            <button type="button" class="code-btn" onclick="sendPhoneCode()">获取验证码</button>
+          </div>
+        </div>
+        <button onclick="handlePhoneLogin()">登 录</button>
+      </div>
+
       <div class="toggle-link">
         没有账号？ <a onclick="toggleForms()">立即注册</a>
       </div>
@@ -90,6 +128,40 @@
       } else {
         window.location.href = 'index.html'; 
       }
+    }
+
+    async function sendPhoneCode() {
+      const phone = document.getElementById('login-phone').value;
+      if (!phone) return alert('请输入手机号，格式如 +8613812345678');
+
+      const { data, error } = await mySupabase.auth.signInWithOtp({ phone });
+      if (error) {
+        alert('发送验证码失败: ' + error.message);
+      } else {
+        alert('验证码已发送，请查收短信。');
+      }
+    }
+
+    async function handlePhoneLogin() {
+      const phone = document.getElementById('login-phone').value;
+      const code = document.getElementById('login-phone-code').value;
+      if (!phone || !code) return alert('请填写手机号和验证码！');
+
+      const { data, error } = await mySupabase.auth.verifyOtp({ phone, token: code, type: 'sms' });
+      if (error) {
+        alert('验证码登录失败: ' + error.message);
+      } else {
+        window.location.href = 'index.html';
+      }
+    }
+
+    function switchLoginMode(mode) {
+      document.getElementById('email-login').style.display = mode === 'email' ? 'block' : 'none';
+      document.getElementById('phone-login').style.display = mode === 'phone' ? 'block' : 'none';
+      const buttons = document.querySelectorAll('.toggle-btn');
+      buttons.forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim() === (mode === 'email' ? '邮箱登录' : '手机验证码'));
+      });
     }
 
     // 处理注册

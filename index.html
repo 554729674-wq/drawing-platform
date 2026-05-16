@@ -2,28 +2,39 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>工程图纸审图平台</title>
+  <title>威卢克斯项目审图平台</title>
   <style>
-    body { margin: 0; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; background: #f4f7f6; }
-    header { background: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;}
-    header h2 { margin: 0; font-size: 1.2rem; }
-    .main { display: flex; flex: 1; padding: 15px; gap: 15px; height: calc(100vh - 80px); }
-    .left { flex: 7; background: white; border-radius: 8px; display: flex; flex-direction: column; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .right { flex: 3; background: white; border-radius: 8px; display: flex; flex-direction: column; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .comment-list { flex: 1; overflow-y: auto; background: #fafafa; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #eee; }
-    .comment-item { background: white; padding: 12px; border: 1px solid #e9ecef; margin-bottom: 8px; border-radius: 6px; font-size: 0.95rem; line-height: 1.5; color: #333;}
-    textarea { width: 100%; box-sizing: border-box; resize: none; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; outline: none; }
-    textarea:focus { border-color: #3498db; }
-    .btn { padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    .btn:hover { background: #2980b9; }
-    .canvas { flex: 1; background: #eef2f5; display: flex; align-items: center; justify-content: center; border: 2px dashed #b2bec3; margin-top: 10px; color: #7f8c8d; }
+    body { margin: 0; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex; flex-direction: column; min-height: 100vh; background: #f4f5f7; color: #111827; }
+    header { background: white; color: #111827; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand img { height: 34px; width: auto; }
+    .brand-title { margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.01em; }
+    .brand-subtitle { margin: 4px 0 0; font-size: 0.92rem; color: #6b7280; }
+    .main { display: flex; flex: 1; padding: 22px; gap: 18px; min-height: calc(100vh - 78px); }
+    .left, .right { background: white; border-radius: 18px; display: flex; flex-direction: column; padding: 20px; box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08); border: 1px solid rgba(226, 232, 240, 0.8); }
+    .left { flex: 7; }
+    .right { flex: 3; }
+    .comment-list { flex: 1; overflow-y: auto; background: #f8fafc; padding: 14px; border-radius: 16px; margin-bottom: 14px; border: 1px solid #e5e7eb; }
+    .comment-item { background: white; padding: 14px; border: 1px solid #e5e7eb; margin-bottom: 12px; border-radius: 14px; font-size: 0.96rem; line-height: 1.65; color: #1f2937; }
+    textarea { width: 100%; box-sizing: border-box; resize: none; padding: 14px; margin-bottom: 12px; border: 1px solid #d1d5db; border-radius: 14px; outline: none; background: #f8fafc; font-size: 0.95rem; color: #111827; }
+    textarea:focus { border-color: #c8102e; background: #ffffff; }
+    .btn { padding: 10px 18px; background: #c8102e; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: background 0.2s ease; }
+    .btn:hover { background: #9f0d28; }
+    .canvas { flex: 1; background: #eef2f5; display: flex; align-items: center; justify-content: center; border: 2px dashed #d1d5db; margin-top: 16px; color: #6b7280; border-radius: 18px; }
+    .section-title { margin: 0 0 16px; color: #111827; font-size: 1rem; font-weight: 700; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <header>
-    <h2>📐 露香园项目 - 施工图审图与协同</h2>
-    <button class="btn" style="background:#e74c3c" onclick="location.href='login.html'">退出登录</button>
+    <div class="brand">
+      <img src="velux-logo.png" alt="VELUX Logo">
+      <div>
+        <h2 class="brand-title">威卢克斯项目审图平台</h2>
+        <div class="brand-subtitle">施工图审图与协同管理</div>
+      </div>
+    </div>
+    <button class="btn" onclick="location.href='login.html'">退出登录</button>
   </header>
 
   <div class="main">
