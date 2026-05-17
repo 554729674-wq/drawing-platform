@@ -188,154 +188,153 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // 存储已选择的文件
+    // 1. 初始化 Supabase 数据库连接
+    const SUPABASE_URL = 'https://mrowhymmhamvrxnvcqjv.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'sb_publishable_idaDaiECgUZeYsCxDkolBg_6bKbkVe_';
+    const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     let selectedFiles = [];
+    let currentUserCompany = '未知公司'; // 用来临时存储当前用户的公司名
+
+    // 页面加载时，先查清楚是谁在建项目
+    window.addEventListener('load', async () => {
+      try {
+        const { data: { user } } = await mySupabase.auth.getUser();
+        if (!user) {
+          alert("请先登录！");
+          window.location.href = 'login.html';
+          return;
+        }
+        // 拿到该用户的公司名称，等下建项目要用到
+        currentUserCompany = user.user_metadata?.company_name || '未知公司';
+      } catch (err) {
+        console.error(err);
+      }
+    });
 
     // 返回上一页
-    function goBack() {
-      window.history.back();
-    }
+    function goBack() { window.history.back(); }
 
     // 添加特殊要求标签
     function addTag(element, tagText) {
       const textarea = document.getElementById('mainProduct');
       const currentText = textarea.value.trim();
-      
-      // 检查是否已存在
       if (currentText.includes(tagText)) {
         element.classList.remove('selected');
-        // 移除标签
         const regex = new RegExp(tagText + '\\s*', 'g');
         textarea.value = currentText.replace(regex, '').trim();
       } else {
         element.classList.add('selected');
-        // 添加标签
         textarea.value = currentText ? currentText + '、' + tagText : tagText;
       }
       textarea.focus();
     }
 
-    // 处理文件选择
-    function handleFileSelect(event) {
-      const files = event.target.files;
-      addFilesToList(files);
-    }
-
-    // 处理拖拽
-    function handleDragOver(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      document.getElementById('uploadArea').classList.add('active');
-    }
-
-    function handleDragLeave(event) {
-      event.preventDefault();
-      document.getElementById('uploadArea').classList.remove('active');
-    }
-
-    function handleDrop(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      document.getElementById('uploadArea').classList.remove('active');
-      
-      const files = event.dataTransfer.files;
-      addFilesToList(files);
-    }
-
-    // 添加文件到列表
+    // --- 文件拖拽与选择处理 (保持原样) ---
+    function handleFileSelect(event) { addFilesToList(event.target.files); }
+    function handleDragOver(event) { event.preventDefault(); document.getElementById('uploadArea').classList.add('active'); }
+    function handleDragLeave(event) { event.preventDefault(); document.getElementById('uploadArea').classList.remove('active'); }
+    function handleDrop(event) { event.preventDefault(); document.getElementById('uploadArea').classList.remove('active'); addFilesToList(event.dataTransfer.files); }
+    
     function addFilesToList(files) {
       for (let file of files) {
-        // 检查文件是否已存在
-        const exists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
-        if (!exists) {
+        if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
           selectedFiles.push(file);
         }
       }
       renderFileList();
     }
 
-    // 渲染文件列表
     function renderFileList() {
       const fileList = document.getElementById('fileList');
       fileList.innerHTML = '';
-
-      if (selectedFiles.length === 0) return;
-
       selectedFiles.forEach((file, index) => {
-        const fileItem = document.createElement('div');
-        fileItem.className = 'file-item';
+        const ext = file.name.split('.').pop().toLowerCase();
+        const icons = {'pdf': '📄', 'dwg': '📐', 'jpg': '🖼️', 'png': '🖼️'};
+        const icon = icons[ext] || '📎';
+        const size = (file.size / 1024 / 1024).toFixed(2);
         
-        const fileIcon = getFileIcon(file.name);
-        const fileSize = (file.size / 1024 / 1024).toFixed(2);
-        
-        fileItem.innerHTML = `
-          <div class="file-info">
-            <div class="file-icon">${fileIcon}</div>
-            <div class="file-details">
-              <div class="file-name">${file.name}</div>
-              <div class="file-size">${fileSize} MB</div>
+        fileList.innerHTML += `
+          <div class="file-item">
+            <div class="file-info">
+              <div class="file-icon">${icon}</div>
+              <div class="file-details">
+                <div class="file-name">${file.name}</div>
+                <div class="file-size">${size} MB</div>
+              </div>
             </div>
+            <button type="button" class="remove-file" onclick="removeFile(${index})">移除</button>
           </div>
-          <button type="button" class="remove-file" onclick="removeFile(${index})">移除</button>
         `;
-        
-        fileList.appendChild(fileItem);
       });
     }
 
-    // 获取文件图标
-    function getFileIcon(fileName) {
-      const ext = fileName.split('.').pop().toLowerCase();
-      const icons = {
-        'pdf': '📄', 'dwg': '📐', 'jpg': '🖼️', 'jpeg': '🖼️', 
-        'png': '🖼️', 'xlsx': '📊', 'xls': '📊', 'doc': '📝', 'docx': '📝'
-      };
-      return icons[ext] || '📎';
-    }
-
-    // 移除文件
     function removeFile(index) {
       selectedFiles.splice(index, 1);
       renderFileList();
     }
 
-    // 表单提交
+    // 🚀 核心升级：提交表单并真正写入数据库
     document.getElementById('createProjectForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const projectName = document.getElementById('projectName').value.trim();
       const mainProduct = document.getElementById('mainProduct').value.trim();
       
-      if (!projectName) {
-        alert('请输入项目名称');
-        return;
-      }
+      if (!projectName || !mainProduct) return alert('请填写完整项目信息');
       
-      if (!mainProduct) {
-        alert('请输入主要产品及特殊要求');
-        return;
-      }
+      // 暂时改变按钮状态，防止用户重复点击
+      const submitBtn = document.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '正在创建中...';
+      submitBtn.disabled = true;
 
-      // 这里可以添加提交逻辑
-      console.log('项目信息:', {
-        projectName,
-        mainProduct,
-        files: selectedFiles.map(f => ({ name: f.name, size: f.size }))
-      });
+      try {
+        // 第一步：把项目信息写入 Supabase 的 projects 表！
+        const { data: projectData, error: projectError } = await mySupabase
+          .from('projects')
+          .insert([
+            { 
+              project_name: projectName, 
+              description: mainProduct,
+              company_name: currentUserCompany // 绑定为当前公司专属项目！
+            }
+          ])
+          .select(); // 写入后立即返回这条新数据的信息
 
-      alert('✓ 项目创建成功！\n项目名称: ' + projectName + '\n文件数量: ' + selectedFiles.length);
-      
-      // 返回首页
-      setTimeout(() => {
+        if (projectError) throw projectError;
+        
+        const newProjectId = projectData[0].id; // 拿到新生成的项目 ID
+
+        // 第二步：如果有附件，把图纸信息写入 drawings 表（关联到刚才的项目 ID）
+        if (selectedFiles.length > 0) {
+          const drawingRecords = selectedFiles.map(file => ({
+            project_id: newProjectId,
+            file_name: file.name,
+            status: '待提交'
+          }));
+
+          const { error: drawingError } = await mySupabase
+            .from('drawings')
+            .insert(drawingRecords);
+
+          if (drawingError) throw drawingError;
+        }
+
+        alert('✓ 项目创建成功并已存入云端！');
         window.location.href = 'index.html';
-      }, 1500);
+
+      } catch (err) {
+        alert('创建失败: ' + err.message);
+        console.error(err);
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
     });
 
-    // 退出登录
-    document.getElementById('signOutBtn').addEventListener('click', () => {
-      if (confirm('确定要退出登录吗？')) {
-        window.location.href = 'login.html';
-      }
+    document.getElementById('signOutBtn').addEventListener('click', async () => {
+      await mySupabase.auth.signOut();
+      window.location.href = 'login.html';
     });
   </script>
 </body>
