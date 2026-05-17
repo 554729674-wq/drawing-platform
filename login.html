@@ -88,9 +88,6 @@
         <button onclick="handlePhoneLogin()">登 录</button>
       </div>
 
-      <div class="toggle-link" style="margin-top: 12px;">
-        <button type="button" style="width:100%; background: #111827; border: none; color: white; padding: 12px 0; border-radius: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer;" onclick="goAdminEntry()">👑 管理员入口</button>
-      </div>
       <div class="toggle-link">
         没有账号？ <a onclick="toggleForms()">立即注册</a>
       </div>
@@ -179,10 +176,6 @@
       } else {
         window.location.href = 'index.html';
       }
-    }
-
-    function goAdminEntry() {
-      window.location.href = 'admin.html';
     }
 
     function switchLoginMode(mode) {

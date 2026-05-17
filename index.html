@@ -97,10 +97,7 @@
     <main>
       <div class="action-bar">
         <h1>公司用户工作台</h1>
-        <div style="display:flex; gap: 12px; flex-wrap:wrap; align-items:center;">
-          <button class="ghost-btn" id="adminEntryBtn">👑 管理员入口</button>
-          <button class="primary-btn" id="createProjectBtn">➕ 新建项目</button>
-        </div>
+        <button class="primary-btn" id="createProjectBtn">➕ 新建项目</button>
       </div>
 
       <div id="contentArea" class="content-area"></div>
@@ -371,9 +368,6 @@
     document.getElementById('signOutBtn').addEventListener('click', signOut);
     document.getElementById('createProjectBtn').addEventListener('click', () => {
       window.location.href = 'create-project.html';
-    });
-    document.getElementById('adminEntryBtn').addEventListener('click', () => {
-      window.location.href = 'admin.html';
     });
 
     window.addEventListener('load', initializePage);

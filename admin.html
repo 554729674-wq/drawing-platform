@@ -198,13 +198,8 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_idaDaiECgUZeYsCxDkolBg_6bKbkVe_';
     const supabase = window.supabase;
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const ADMIN_EMAILS = [
-      'admin@velux.com',
-      'shenpi@test.com',
-      '554729674@qq.com',
-      'test@velux.com',
-      'demo@velux.com'
-    ];
+    const ADMIN_ROLE = 'admin';
+    const ADMIN_COMPANY_NAME = '威卢克斯中国有限公司';
 
     const mockTasks = [
       {
@@ -255,10 +250,12 @@
       client.auth.getUser().then(({ data, error }) => {
         const user = data?.user;
         const email = user?.email || '';
+        const role = user?.user_metadata?.role || '';
+        const company = user?.user_metadata?.company_name || '';
         const adminEmailElement = document.getElementById('adminEmail');
 
-        if (!email || !ADMIN_EMAILS.includes(email.toLowerCase())) {
-          alert('访问被拒绝：您没有审批员权限，请使用管理员账号登录。');
+        if (!email || role !== ADMIN_ROLE || company !== ADMIN_COMPANY_NAME) {
+          alert('访问被拒绝：您没有审批员权限或账户未配置为管理员。');
           window.location.href = 'login.html';
           return;
         }
