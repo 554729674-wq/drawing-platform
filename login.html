@@ -134,6 +134,22 @@
       }
     }
 
+    // 登录后根据用户身份跳转
+    async function redirectAfterLogin() {
+      const { data, error } = await mySupabase.auth.getUser();
+      const user = data?.user;
+      if (!user) return window.location.href = 'index.html';
+      
+      const role = user.user_metadata?.role || '';
+      const company = user.user_metadata?.company_name || '';
+      
+      if (role === 'admin' && company === '威卢克斯中国有限公司') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'index.html';
+      }
+    }
+
     // 处理登录
     async function handleLogin() {
       const email = document.getElementById('login-email').value;
@@ -145,7 +161,7 @@
       if (error) {
         alert("登录失败: " + error.message + " (请检查密码或是否已注册)");
       } else {
-        window.location.href = 'index.html'; 
+        redirectAfterLogin();
       }
     }
 
@@ -174,7 +190,7 @@
       if (error) {
         alert('验证码登录失败: ' + error.message);
       } else {
-        window.location.href = 'index.html';
+        redirectAfterLogin();
       }
     }
 

@@ -270,18 +270,25 @@
           return;
         }
 
-        const companyName = user.user_metadata?.company_name || '未知公司';
-        companyBadge.innerHTML = `<span>🏢 ${companyName || '未知公司'}</span>`;
+        const role = user.user_metadata?.role || '';
+        const company = user.user_metadata?.company_name || '未知公司';
 
-        if (hasAdminReservedWord(companyName)) {
+        if (role === 'admin' && company === '威卢克斯中国有限公司') {
+          window.location.href = 'admin.html';
+          return;
+        }
+
+        if (hasAdminReservedWord(company)) {
           redirectToLogin('当前用户角色与公司用户身份不匹配，请使用正确账户登录。');
           return;
         }
 
+        companyBadge.innerHTML = `<span>🏢 ${company || '未知公司'}</span>`;
+
         const { data: projectRows, error: projectError } = await mySupabase
           .from('projects')
           .select('id, project_name, description, company_name')
-          .eq('company_name', companyName);
+          .eq('company_name', company);
 
         if (projectError) {
           throw projectError;
