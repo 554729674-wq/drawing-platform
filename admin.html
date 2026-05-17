@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>审批员工作台 - 渠道审图平台</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #0f172a; color: #e2e8f0; }
+    a, button { font-family: inherit; }
+    button { cursor: pointer; }
+    .admin-shell { display: grid; grid-template-rows: auto 1fr; min-height: 100vh; }
+    .admin-header { background: #111827; border-bottom: 1px solid #334155; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .header-title { display: flex; align-items: center; gap: 12px; color: #f8fafc; font-size: 1.15rem; font-weight: 700; }
+    .header-title span { background: #475569; border-radius: 999px; padding: 6px 10px; font-size: 0.95rem; }
+    .header-actions { display: flex; align-items: center; gap: 14px; }
+    .header-actions .admin-email { color: #94a3b8; font-size: 0.95rem; }
+    .logout-btn { background: #dc2626; color: white; border: none; border-radius: 12px; padding: 10px 18px; font-weight: 700; transition: transform 0.2s ease, background 0.2s ease; }
+    .logout-btn:hover { background: #b91c1c; transform: translateY(-1px); }
+    .admin-main { display: grid; grid-template-columns: 280px 1fr; gap: 20px; padding: 24px 28px; }
+    .sidebar { background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 22px; }
+    .sidebar h2 { margin: 0; font-size: 1rem; font-weight: 700; color: #f8fafc; }
+    .sidebar label { display: block; margin-bottom: 10px; color: #cbd5e1; font-size: 0.95rem; font-weight: 600; }
+    .sidebar select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; }
+    .sidebar .filter-note { color: #94a3b8; font-size: 0.88rem; line-height: 1.6; }
+    .dashboard { display: grid; gap: 20px; }
+    .dashboard-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+    .dashboard-title { margin: 0; font-size: 1.4rem; font-weight: 700; color: #f8fafc; }
+    .summary-card { background: #111827; border: 1px solid #334155; border-radius: 18px; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 220px; }
+    .summary-card h3 { margin: 0 0 6px; font-size: 0.95rem; color: #94a3b8; font-weight: 600; }
+    .summary-card p { margin: 0; font-size: 1.35rem; font-weight: 700; color: #f8fafc; }
+    .table-card { background: #111827; border: 1px solid #334155; border-radius: 22px; overflow: hidden; }
+    .table-card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #334155; }
+    .table-card-header h2 { margin: 0; font-size: 1.1rem; color: #f8fafc; }
+    .table-card-header .subtitle { color: #94a3b8; font-size: 0.95rem; }
+    .task-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    .task-table th, .task-table td { padding: 16px 18px; text-align: left; vertical-align: middle; }
+    .task-table th { color: #94a3b8; font-size: 0.88rem; letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid #334155; }
+    .task-table tbody tr { border-bottom: 1px solid #334155; }
+    .task-table tbody tr:last-child { border-bottom: none; }
+    .task-table td { color: #e2e8f0; font-size: 0.95rem; }
+    .company-cell { font-weight: 700; color: #f8fafc; }
+    .drawing-link { color: #38bdf8; text-decoration: none; cursor: pointer; transition: color 0.2s ease; }
+    .drawing-link:hover { color: #7dd3fc; }
+    .status-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 96px; border-radius: 999px; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.01em; }
+    .status-pending { background: #fbbf24; color: #1f2937; }
+    .status-rejected { background: #dc2626; color: white; }
+    .status-approved { background: #059669; color: white; }
+    .status-draft { background: #475569; color: #cbd5e1; opacity: 0.72; }
+    .action-btn { border: none; border-radius: 12px; padding: 11px 18px; font-size: 0.92rem; font-weight: 700; color: white; background: #0f172a; box-shadow: inset 0 0 0 1px #334155; transition: all 0.2s ease; }
+    .action-btn:hover { background: #1e293b; transform: translateY(-1px); }
+    .modal-mask { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); display: none; align-items: center; justify-content: center; padding: 24px; z-index: 30; }
+    .modal-mask.active { display: flex; }
+    .review-modal { width: min(1200px, 100%); max-height: 92vh; background: #0f172a; border: 1px solid #334155; border-radius: 24px; overflow: hidden; display: grid; grid-template-columns: 1.9fr 1fr; }
+    .review-left, .review-right { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+    .review-left { background: #111827; }
+    .preview-box { flex: 1; border: 2px dashed #334155; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 1rem; text-align: center; padding: 24px; }
+    .review-right { background: #111827; border-left: 1px solid #334155; }
+    .review-summary { display: grid; gap: 14px; }
+    .review-summary h3 { margin: 0; color: #f8fafc; font-size: 1.1rem; }
+    .review-summary .meta { display: flex; flex-direction: column; gap: 6px; color: #cbd5e1; font-size: 0.95rem; }
+    .meta span { display: flex; justify-content: space-between; gap: 8px; }
+    .comment-stream { flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 18px; padding: 18px; overflow-y: auto; }
+    .comment-item { margin-bottom: 16px; }
+    .comment-item:last-child { margin-bottom: 0; }
+    .comment-item p { margin: 0; line-height: 1.7; color: #cbd5e1; }
+    .comment-item time { display: block; margin-top: 8px; color: #64748b; font-size: 0.82rem; }
+    .comment-item.rejected p { color: #fecaca; }
+    .comment-item.approved p { color: #bbf7d0; }
+    .decision-box { display: grid; gap: 14px; }
+    .decision-box label { font-weight: 700; color: #f8fafc; }
+    .decision-box textarea { width: 100%; min-height: 140px; resize: vertical; border-radius: 16px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; padding: 14px 16px; font-size: 0.95rem; line-height: 1.6; }
+    .decision-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .reject-btn { background: #dc2626; }
+    .approve-btn { background: #059669; }
+    .panel-close { align-self: start; background: transparent; border: none; color: #94a3b8; font-size: 0.95rem; cursor: pointer; padding: 8px 0; }
+    .panel-close:hover { color: #f8fafc; }
+    .status-indicator { display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+    .status-indicator span { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .status-indicator.pending span { background: #fbbf24; }
+    .status-indicator.rejected span { background: #dc2626; }
+    .status-indicator.approved span { background: #059669; }
+    @media (max-width: 1120px) {
+      .admin-main { grid-template-columns: 1fr; }
+      .review-modal { grid-template-columns: 1fr; max-height: 96vh; }
+      .review-right { border-left: none; border-top: 1px solid #334155; }
+    }
+    @media (max-width: 768px) {
+      .admin-header { flex-direction: column; align-items: flex-start; }
+      .dashboard-top { flex-direction: column; align-items: stretch; }
+      .task-table { min-width: auto; }
+      .task-table th, .task-table td { padding: 12px 10px; }
+      .summary-card { min-width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div class="header-title"><span>👑</span>审批控制中心 - 渠道审图平台</div>
+      <div class="header-actions">
+        <div class="admin-email" id="adminEmail">当前用户：加载中...</div>
+        <button class="logout-btn" id="logoutBtn">退出登录</button>
+      </div>
+    </header>
+
+    <div class="admin-main">
+      <aside class="sidebar">
+        <h2>全局筛选</h2>
+        <label for="companyFilter">公司筛选</label>
+        <select id="companyFilter" onchange="renderTaskTable()">
+          <option value="all">全部公司</option>
+          <option value="华东建筑设计研究院">华东建筑设计研究院</option>
+          <option value="某某工程公司">某某工程公司</option>
+          <option value="未知测试公司">未知测试公司</option>
+        </select>
+        <p class="filter-note">选择后实时刷新下方审批任务列表，仅显示当前管理员关心的图纸。</p>
+        <div class="summary-card">
+          <div>
+            <h3>待审核任务</h3>
+            <p id="pendingCount">0</p>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div>
+            <h3>已驳回</h3>
+            <p id="rejectedCount">0</p>
+          </div>
+        </div>
+      </aside>
+
+      <section class="dashboard">
+        <div class="dashboard-top">
+          <div>
+            <h1 class="dashboard-title">审批员工作台</h1>
+            <p class="subtitle">当前显示所有待办审核图纸，点击图纸名称或进入审图进入审批面板。</p>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header">
+            <h2>全局审核任务表</h2>
+            <div class="status-indicator pending"><span></span>待审核优先</div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="task-table" id="taskTable">
+              <thead>
+                <tr>
+                  <th>所属公司</th>
+                  <th>项目名称</th>
+                  <th>图纸名称</th>
+                  <th>版本</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="reviewModal">
+    <div class="review-modal" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
+      <div class="review-left">
+        <div class="review-summary">
+          <button class="panel-close" onclick="closeReviewModal()">← 关闭审图</button>
+          <h3 id="reviewTitle">审图面板</h3>
+          <div class="meta">
+            <span><strong>图纸：</strong><span id="modalDrawingName">-</span></span>
+            <span><strong>版本：</strong><span id="modalVersion">-</span></span>
+            <span><strong>提交公司：</strong><span id="modalCompany">-</span></span>
+          </div>
+        </div>
+        <div class="preview-box">【PDF.js 高清图纸渲染区】</div>
+      </div>
+      <div class="review-right">
+        <div class="review-summary">
+          <h3>历史批注流</h3>
+          <div class="comment-stream" id="commentStream"></div>
+        </div>
+        <div class="decision-box">
+          <label for="reviewComments">审批意见 / 修改要求</label>
+          <textarea id="reviewComments" placeholder="请输入本次审核意见，例如：请补充排烟口标高及控制方案。"></textarea>
+        </div>
+        <div class="decision-actions">
+          <button class="action-btn reject-btn" onclick="rejectTask()">🔴 打回修改</button>
+          <button class="action-btn approve-btn" onclick="approveTask()">🟢 审核通过</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://mrowhymmhamvrxnvcqjv.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_idaDaiECgUZeYsCxDkolBg_6bKbkVe_';
+    const supabase = window.supabase;
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const ADMIN_EMAILS = [
+      'admin@velux.com',
+      'shenpi@test.com',
+      '554729674@qq.com',
+      'test@velux.com',
+      'demo@velux.com'
+    ];
+
+    const mockTasks = [
+      {
+        company: '华东建筑设计研究院',
+        project: '露香园项目',
+        drawing: '智能系统施工图.pdf',
+        version: 'V2',
+        status: '待审核',
+        comments: [
+          { type: 'pending', text: '请重点核对智能系统与消防联动的节点配置是否一致。', time: '2026-05-16 09:24' }
+        ]
+      },
+      {
+        company: '某某工程公司',
+        project: '闵行医院项目',
+        drawing: '天窗排烟系统方案调整.pdf',
+        version: 'V3',
+        status: '已驳回',
+        comments: [
+          { type: 'rejected', text: '请核实图纸中单窗最大排烟面积是否符合最新规范，现有数据存在歧义，务必调整。', time: '2026-05-15 14:18' }
+        ]
+      },
+      {
+        company: '未知测试公司',
+        project: '森兰岛项目',
+        drawing: '综合楼通风系统验收图.pdf',
+        version: 'V1',
+        status: '已通过',
+        comments: [
+          { type: 'approved', text: '图纸审核通过，建议下一阶段同步施工单位数据库入模。', time: '2026-05-14 11:02' }
+        ]
+      },
+      {
+        company: '华东建筑设计研究院',
+        project: '虹桥购物中心',
+        drawing: '建筑节点详图.pdf',
+        version: 'V1',
+        status: '待提交',
+        comments: [
+          { type: 'draft', text: '渠道商尚在完善局部节点，暂不提交审批。', time: '2026-05-17 08:06' }
+        ]
+      }
+    ];
+
+    let currentTaskIndex = null;
+
+    function guardGate() {
+      client.auth.getUser().then(({ data, error }) => {
+        const user = data?.user;
+        const email = user?.email || '';
+        const adminEmailElement = document.getElementById('adminEmail');
+
+        if (!email || !ADMIN_EMAILS.includes(email.toLowerCase())) {
+          alert('访问被拒绝：您没有审批员权限，请使用管理员账号登录。');
+          window.location.href = 'login.html';
+          return;
+        }
+
+        adminEmailElement.textContent = `当前用户：${email}`;
+        renderTaskTable();
+      }).catch(() => {
+        alert('登录状态异常，请重新登录。');
+        window.location.href = 'login.html';
+      });
+    }
+
+    function renderTaskTable() {
+      const companyFilter = document.getElementById('companyFilter').value;
+      const tbody = document.querySelector('#taskTable tbody');
+      const filteredTasks = mockTasks.filter(task => companyFilter === 'all' || task.company === companyFilter);
+      tbody.innerHTML = '';
+
+      filteredTasks.forEach((task, index) => {
+        const statusClass = getStatusClass(task.status);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="company-cell">${task.company}</td>
+          <td>${task.project}</td>
+          <td><a class="drawing-link" onclick="openReviewModal(${index})">${task.drawing}</a></td>
+          <td>${task.version}</td>
+          <td><span class="status-pill ${statusClass}">${task.status}</span></td>
+          <td><button class="action-btn" onclick="openReviewModal(${index})">进入审图</button></td>
+        `;
+        if (task.status === '待提交' || task.status === '已通过') {
+          row.style.opacity = '0.72';
+        }
+        tbody.appendChild(row);
+      });
+
+      updateSummaryCounts(filteredTasks);
+    }
+
+    function getStatusClass(status) {
+      switch (status) {
+        case '待审核': return 'status-pending';
+        case '已驳回': return 'status-rejected';
+        case '已通过': return 'status-approved';
+        case '待提交': return 'status-draft';
+        default: return 'status-draft';
+      }
+    }
+
+    function updateSummaryCounts(tasks) {
+      const pending = tasks.filter(task => task.status === '待审核').length;
+      const rejected = tasks.filter(task => task.status === '已驳回').length;
+      document.getElementById('pendingCount').textContent = pending;
+      document.getElementById('rejectedCount').textContent = rejected;
+    }
+
+    function openReviewModal(index) {
+      currentTaskIndex = index;
+      const task = mockTasks[index];
+      document.getElementById('modalDrawingName').textContent = task.drawing;
+      document.getElementById('modalVersion').textContent = task.version;
+      document.getElementById('modalCompany').textContent = task.company;
+      renderComments(task.comments);
+      document.getElementById('reviewComments').value = '';
+      document.getElementById('reviewModal').classList.add('active');
+    }
+
+    function closeReviewModal() {
+      document.getElementById('reviewModal').classList.remove('active');
+    }
+
+    function renderComments(comments) {
+      const stream = document.getElementById('commentStream');
+      stream.innerHTML = '';
+      comments.forEach(comment => {
+        const item = document.createElement('div');
+        item.className = `comment-item ${comment.type}`;
+        item.innerHTML = `<p>${comment.text}</p><time>${comment.time}</time>`;
+        stream.appendChild(item);
+      });
+    }
+
+    function rejectTask() {
+      const comment = document.getElementById('reviewComments').value.trim();
+      if (!comment) {
+        alert('请填写打回修改意见后再操作。');
+        return;
+      }
+      const task = mockTasks[currentTaskIndex];
+      task.status = '已驳回';
+      task.comments.unshift({ type: 'rejected', text: comment, time: new Date().toLocaleString('zh-CN') });
+      renderTaskTable();
+      openReviewModal(currentTaskIndex);
+      alert('已将图纸打回修改。');
+    }
+
+    function approveTask() {
+      const comment = document.getElementById('reviewComments').value.trim();
+      if (!comment) {
+        alert('请填写审核意见后再操作。');
+        return;
+      }
+      const task = mockTasks[currentTaskIndex];
+      task.status = '已通过';
+      task.comments.unshift({ type: 'approved', text: comment, time: new Date().toLocaleString('zh-CN') });
+      renderTaskTable();
+      openReviewModal(currentTaskIndex);
+      alert('已审核通过该图纸。');
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      const { error } = await client.auth.signOut();
+      if (error) {
+        alert('退出登录失败，请重试。');
+        return;
+      }
+      window.location.href = 'login.html';
+    });
+
+    window.addEventListener('load', guardGate);
+  </script>
+</body>
+</html>

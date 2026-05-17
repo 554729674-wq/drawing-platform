@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>新建项目 - 渠道图纸审图平台</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f4f7f6; color: #1f2937; }
+    a, button { font-family: inherit; }
+    button { cursor: pointer; }
+    .page-shell { max-width: 1000px; margin: 0 auto; padding: 0 20px 40px; }
+    header { background: #2c3e50; color: #ffffff; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; border-radius: 0 0 18px 18px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08); }
+    .brand-section { display: flex; align-items: center; gap: 14px; }
+    .brand-title { margin: 0; font-size: 1.18rem; font-weight: 700; letter-spacing: 0.02em; }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; color: #ffffff; text-decoration: none; cursor: pointer; transition: opacity 0.2s ease; }
+    .back-link:hover { opacity: 0.8; }
+    .header-actions { display: flex; align-items: center; gap: 18px; }
+    .ghost-btn { border: 1px solid rgba(255,255,255,0.72); color: white; background: transparent; border-radius: 999px; padding: 10px 18px; transition: background 0.2s ease, opacity 0.2s ease; }
+    .ghost-btn:hover { background: rgba(255,255,255,0.1); opacity: 0.94; }
+    main { margin-top: 24px; }
+    .page-title { margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700; color: #111827; }
+    .page-subtitle { margin: 0 0 32px 0; color: #6b7280; font-size: 0.95rem; }
+    .form-container { background: white; border-radius: 18px; box-shadow: 0 20px 45px rgba(15, 23, 42, 0.06); padding: 32px; }
+    .form-section { margin-bottom: 32px; }
+    .form-section:last-child { margin-bottom: 0; }
+    .section-title { font-size: 1.1rem; font-weight: 700; color: #111827; margin: 0 0 18px 0; display: flex; align-items: center; gap: 8px; }
+    .section-icon { font-size: 1.2rem; }
+    .form-group { margin-bottom: 20px; }
+    .form-group:last-child { margin-bottom: 0; }
+    label { display: block; margin-bottom: 8px; color: #374151; font-weight: 600; font-size: 0.95rem; }
+    .required { color: #ef4444; }
+    input[type="text"], textarea, select { width: 100%; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 12px; background: #f8fafc; color: #111827; font-family: inherit; font-size: 0.95rem; transition: border-color 0.2s ease, background 0.2s ease; }
+    input[type="text"]:focus, textarea:focus, select:focus { border-color: #3498db; background: #ffffff; outline: none; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
+    textarea { resize: vertical; min-height: 120px; }
+    .hint-text { font-size: 0.88rem; color: #6b7280; margin-top: 6px; line-height: 1.5; }
+    .tags-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .tag { display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; border-radius: 999px; padding: 8px 14px; font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+    .tag:hover { background: #dbeafe; border-color: #93c5fd; }
+    .tag.selected { background: #3498db; border-color: #3498db; color: white; }
+    .file-upload { position: relative; }
+    .file-input-wrapper { position: relative; display: inline-block; width: 100%; }
+    .file-input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .file-upload-area { border: 2px dashed #bfdbfe; border-radius: 12px; padding: 32px; text-align: center; background: #eff6ff; cursor: pointer; transition: all 0.2s ease; }
+    .file-upload-area:hover { border-color: #3498db; background: #dbeafe; }
+    .file-upload-area.active { border-color: #3498db; background: #dbeafe; }
+    .upload-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .upload-text { font-size: 0.95rem; color: #374151; margin-bottom: 4px; font-weight: 600; }
+    .upload-hint { font-size: 0.85rem; color: #6b7280; }
+    .file-list { margin-top: 16px; }
+    .file-item { display: flex; align-items: center; justify-content: space-between; background: #f3f4f6; padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; }
+    .file-info { display: flex; align-items: center; gap: 10px; }
+    .file-icon { font-size: 1.2rem; }
+    .file-details { text-align: left; }
+    .file-name { font-weight: 600; color: #111827; font-size: 0.93rem; }
+    .file-size { font-size: 0.83rem; color: #6b7280; }
+    .remove-file { background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 0.9rem; padding: 4px 8px; border-radius: 6px; transition: background 0.2s ease; }
+    .remove-file:hover { background: rgba(239, 68, 68, 0.1); }
+    .form-actions { display: flex; gap: 14px; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; }
+    .btn { padding: 13px 24px; border-radius: 12px; border: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
+    .primary-btn { background: #3498db; color: white; box-shadow: 0 10px 25px rgba(52, 152, 219, 0.2); }
+    .primary-btn:hover { background: #2c82c9; transform: translateY(-1px); }
+    .primary-btn:active { transform: translateY(0); }
+    .secondary-btn { background: transparent; color: #3498db; border: 1px solid #3498db; }
+    .secondary-btn:hover { background: #eff6ff; }
+    .divider { width: 100%; height: 1px; background: #e5e7eb; margin: 24px 0; }
+    .error-message { color: #dc2626; font-size: 0.88rem; margin-top: 6px; }
+    .success-message { color: #16a34a; font-size: 0.88rem; margin-top: 6px; }
+    @media (max-width: 768px) {
+      .page-shell { padding: 0 14px 30px; }
+      .form-container { padding: 24px; }
+      .form-actions { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+      header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .header-actions { width: 100%; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header>
+      <div class="brand-section">
+        <a class="back-link" onclick="goBack()">
+          <span>←</span>
+          <div class="brand-title">📐 渠道图纸审图平台</div>
+        </a>
+      </div>
+      <div class="header-actions">
+        <button class="ghost-btn" id="signOutBtn">退出登录</button>
+      </div>
+    </header>
+
+    <main>
+      <h1 class="page-title">新建项目</h1>
+      <p class="page-subtitle">请填写项目基本信息，上传项目图纸</p>
+
+      <div class="form-container">
+        <form id="createProjectForm">
+          <!-- 基本信息 -->
+          <div class="form-section">
+            <h2 class="section-title"><span class="section-icon">📋</span>项目基本信息</h2>
+            
+            <div class="form-group">
+              <label for="projectName">项目名称 <span class="required">*</span></label>
+              <input 
+                type="text" 
+                id="projectName" 
+                name="projectName" 
+                placeholder="例如：ABC商场二期装修" 
+                required
+              >
+              <p class="hint-text">请输入您的项目名称</p>
+            </div>
+
+            <div class="form-group">
+              <label for="mainProduct">主要产品及特殊要求 <span class="required">*</span></label>
+              <textarea 
+                id="mainProduct" 
+                name="mainProduct" 
+                placeholder="例如：需要防火等级A级，优化排烟系统..."
+                required
+              ></textarea>
+              <p class="hint-text">请描述项目的主要产品和任何特殊要求</p>
+            </div>
+          </div>
+
+          <!-- 特殊要求标签 -->
+          <div class="form-section">
+            <h2 class="section-title"><span class="section-icon">🏷️</span>特殊要求示例</h2>
+            <p class="hint-text" style="margin-bottom: 14px;">点击下方标签快速添加常见特殊要求到备注中</p>
+            
+            <div class="tags-container" id="tagsContainer">
+              <div class="tag" onclick="addTag(this, '防火')">🔥 防火</div>
+              <div class="tag" onclick="addTag(this, '排烟')">💨 排烟</div>
+              <div class="tag" onclick="addTag(this, 'K值')">📏 K值</div>
+              <div class="tag" onclick="addTag(this, '逃生')">🚪 逃生</div>
+              <div class="tag" onclick="addTag(this, '隔音')">🔇 隔音</div>
+              <div class="tag" onclick="addTag(this, '防水')">💧 防水</div>
+              <div class="tag" onclick="addTag(this, '节能')">⚡ 节能</div>
+              <div class="tag" onclick="addTag(this, '防盗')">🔐 防盗</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- 图纸上传 -->
+          <div class="form-section">
+            <h2 class="section-title"><span class="section-icon">📎</span>上传项目图纸</h2>
+            
+            <div class="file-upload">
+              <div class="file-input-wrapper">
+                <input 
+                  type="file" 
+                  id="blueprintFile" 
+                  class="file-input" 
+                  multiple
+                  accept=".pdf,.dwg,.jpg,.jpeg,.png,.xlsx,.xls,.doc,.docx"
+                  onchange="handleFileSelect(event)"
+                >
+                <div 
+                  class="file-upload-area" 
+                  id="uploadArea"
+                  onclick="document.getElementById('blueprintFile').click()"
+                  ondrop="handleDrop(event)"
+                  ondragover="handleDragOver(event)"
+                  ondragleave="handleDragLeave(event)"
+                >
+                  <div class="upload-icon">📁</div>
+                  <div class="upload-text">拖拽或点击上传图纸</div>
+                  <div class="upload-hint">支持 PDF、DWG、JPG、PNG、Excel、Word 等格式</div>
+                </div>
+              </div>
+              <div class="file-list" id="fileList"></div>
+            </div>
+            <p class="hint-text">单个文件不超过 100MB，建议上传高清图纸</p>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- 表单操作 -->
+          <div class="form-actions">
+            <button type="button" class="btn secondary-btn" onclick="goBack()">取消</button>
+            <button type="submit" class="btn primary-btn">✓ 创建项目</button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // 存储已选择的文件
+    let selectedFiles = [];
+
+    // 返回上一页
+    function goBack() {
+      window.history.back();
+    }
+
+    // 添加特殊要求标签
+    function addTag(element, tagText) {
+      const textarea = document.getElementById('mainProduct');
+      const currentText = textarea.value.trim();
+      
+      // 检查是否已存在
+      if (currentText.includes(tagText)) {
+        element.classList.remove('selected');
+        // 移除标签
+        const regex = new RegExp(tagText + '\\s*', 'g');
+        textarea.value = currentText.replace(regex, '').trim();
+      } else {
+        element.classList.add('selected');
+        // 添加标签
+        textarea.value = currentText ? currentText + '、' + tagText : tagText;
+      }
+      textarea.focus();
+    }
+
+    // 处理文件选择
+    function handleFileSelect(event) {
+      const files = event.target.files;
+      addFilesToList(files);
+    }
+
+    // 处理拖拽
+    function handleDragOver(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      document.getElementById('uploadArea').classList.add('active');
+    }
+
+    function handleDragLeave(event) {
+      event.preventDefault();
+      document.getElementById('uploadArea').classList.remove('active');
+    }
+
+    function handleDrop(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      document.getElementById('uploadArea').classList.remove('active');
+      
+      const files = event.dataTransfer.files;
+      addFilesToList(files);
+    }
+
+    // 添加文件到列表
+    function addFilesToList(files) {
+      for (let file of files) {
+        // 检查文件是否已存在
+        const exists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
+        if (!exists) {
+          selectedFiles.push(file);
+        }
+      }
+      renderFileList();
+    }
+
+    // 渲染文件列表
+    function renderFileList() {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+
+      if (selectedFiles.length === 0) return;
+
+      selectedFiles.forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        
+        const fileIcon = getFileIcon(file.name);
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        
+        fileItem.innerHTML = `
+          <div class="file-info">
+            <div class="file-icon">${fileIcon}</div>
+            <div class="file-details">
+              <div class="file-name">${file.name}</div>
+              <div class="file-size">${fileSize} MB</div>
+            </div>
+          </div>
+          <button type="button" class="remove-file" onclick="removeFile(${index})">移除</button>
+        `;
+        
+        fileList.appendChild(fileItem);
+      });
+    }
+
+    // 获取文件图标
+    function getFileIcon(fileName) {
+      const ext = fileName.split('.').pop().toLowerCase();
+      const icons = {
+        'pdf': '📄', 'dwg': '📐', 'jpg': '🖼️', 'jpeg': '🖼️', 
+        'png': '🖼️', 'xlsx': '📊', 'xls': '📊', 'doc': '📝', 'docx': '📝'
+      };
+      return icons[ext] || '📎';
+    }
+
+    // 移除文件
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      renderFileList();
+    }
+
+    // 表单提交
+    document.getElementById('createProjectForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const projectName = document.getElementById('projectName').value.trim();
+      const mainProduct = document.getElementById('mainProduct').value.trim();
+      
+      if (!projectName) {
+        alert('请输入项目名称');
+        return;
+      }
+      
+      if (!mainProduct) {
+        alert('请输入主要产品及特殊要求');
+        return;
+      }
+
+      // 这里可以添加提交逻辑
+      console.log('项目信息:', {
+        projectName,
+        mainProduct,
+        files: selectedFiles.map(f => ({ name: f.name, size: f.size }))
+      });
+
+      alert('✓ 项目创建成功！\n项目名称: ' + projectName + '\n文件数量: ' + selectedFiles.length);
+      
+      // 返回首页
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1500);
+    });
+
+    // 退出登录
+    document.getElementById('signOutBtn').addEventListener('click', () => {
+      if (confirm('确定要退出登录吗？')) {
+        window.location.href = 'login.html';
+      }
+    });
+  </script>
+</body>
+</html>

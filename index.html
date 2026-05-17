@@ -328,7 +328,7 @@
 
     document.getElementById('signOutBtn').addEventListener('click', signOut);
     document.getElementById('createProjectBtn').addEventListener('click', () => {
-      alert('新建项目功能为占位，后续可接入项目管理表。');
+      window.location.href = 'create-project.html';
     });
 
     window.addEventListener('load', initializePage);
